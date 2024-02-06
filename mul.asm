@@ -1,44 +1,29 @@
 data segment
-    num db ?
+msg1 db 13,10,"Enter number 1: $"
+msg2 db 13,10,"Enter number 2: $"
+msg3 db 13,10,"Result is $"
 data ends
 
 code segment
-    assume cs:code, ds:data
+assume ds:data,cs:code
 
-    input_num proc
-        mov ah, 01
+input_num proc
+    mov bx,0000h
+    input_loop:
+        mov ah,01h
         int 21h
-        mov bl, al
-
-        mov ah, 01
-        int 21h
-        mov bh, al
-
-        mov ah, 01
-        int 21h
-        mov cl, al
-
-        mov ah, 01
-        int 21h
-        mov ch, al
-
-        sub bl, '0'
-        sub bh, '0'
-        sub cl, '0'
-        sub ch, '0'
-
-        mov ax, 10
+        cmp al,13
+        je exit_input
+        sub al,'0'
+        mov cl,al
+        mov ax,10
         mul bl
-        mov bl, al
-        add bl, bh
-
-        mov ax, 10
-        mul cl
-        mov cl, al
-        add cl, ch
-
+        mov bl,al
+        add bl,cl
+        jmp input_loop
+    exit_input:
         ret
-    input_num endp
+        input_num endp
 
 print_value proc
     mov cx, 0
@@ -69,20 +54,20 @@ exit_print:
 
 done_printing:
     ret
-print_value endp
-
+    print_value endp
 
 start:
-    mov ax, data
-    mov ds, ax
+mov ax,data
+mov ds,ax
 
-    call input_num
-    mov al,cl
-    add bl,al
-    call print_value
+call input_num
+mov ax,bx
+mul bx
+call print_value
 
-    mov ah, 4ch
-    int 21h
+
+mov ah,4ch
+int 21h
 
 code ends
 end start
